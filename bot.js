@@ -92,7 +92,7 @@ if (message.content.includes('~checkout')){
   
         const totalMinutes = diff_minutes(result.checkOutTime, result.checkInTime)
   
-      if(totalMinutes>=1){
+      if(totalMinutes>=30){
           result.$inc('bananaCount', 1)
           message.reply(`You checked in at ${moment.tz(result.checkInTime, 'America/Los_Angeles').format('h:mm a')}\nYou checked out at ${moment.tz(result.checkOutTime, 'America/Los_Angeles').format('h:mm a')}\nYou were in class for ${totalMinutes} minutes.\n You earned a 🍌!!!\nYou now have ${result.bananaCount} bananas.`)
           result.$set({checkInTime:null, checkOutTime:null})
