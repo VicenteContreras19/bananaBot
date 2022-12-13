@@ -2,10 +2,13 @@
 const mongoose = require('mongoose')
 require('dotenv').config({path:'./config/.env'})
 const connectDb = require('./config/db')
-const {Client, GatewayIntentBits} = require('discord.js')
+const {Client, GatewayIntentBits, EmbedBuilder} = require('discord.js')
 const Member = require ('./models/Member.js')
 const moment = require ('moment-timezone')
 const diff_minutes = require('./methods')
+
+
+
 
 //connection
 connectDb()
@@ -46,6 +49,7 @@ if (message.content.includes("~enroll")) {
           discordID: discordID,
           bananaCount: 0,
           shameCount: 0,
+          totalMinutes: 0
         });
   
         console.log(newStudent);
@@ -91,13 +95,18 @@ if (message.content.includes('~checkout')){
         console.log(diff_minutes(result.checkOutTime, result.checkInTime))
   
         const totalMinutes = diff_minutes(result.checkOutTime, result.checkInTime)
+
+        result.$inc('totalMinutes', totalMinutes)
   
-      if(totalMinutes>=30){
+      if(totalMinutes>=1){
+
           result.$inc('bananaCount', 1)
           message.reply(`You checked in at ${moment.tz(result.checkInTime, 'America/Los_Angeles').format('h:mm a')}\nYou checked out at ${moment.tz(result.checkOutTime, 'America/Los_Angeles').format('h:mm a')}\nYou were in class for ${totalMinutes} minutes.\n You earned a 🍌!!!\nYou now have ${result.bananaCount} bananas.`)
           result.$set({checkInTime:null, checkOutTime:null})
           result.save()
       }else{
+
+       
           result.$inc('shameCount', 1)
           message.reply(`You checked in at ${moment.tz(result.checkInTime, 'America/Los_Angeles').format('h:mm a')}\nYou checked out at ${moment.tz(result.checkOutTime, 'America/Los_Angeles').format('h:mm a')}\nYou were in class for ${totalMinutes} minutes.\n You trying to fuck me? You're only fucking yourself over. Any aspiring webdev would LOVE to be here right now. Shame on you, shame on your family, shame on your future generations. Shame shame shame. You receive no banana. Go back to class and start earning!\nYou now have ${result.shameCount} shame.`)
           result.$set({checkInTime:null, checkOutTime:null})
@@ -123,7 +132,8 @@ if (message.content.includes('~checkout')){
         result.$set(targetProperty,targetValue)
         result.save()
         console.log(result)
-        message.reply(`${result.firstName} now has ${targetProperty==='bananaCount'? result.bananaCount : result.shameCount} ${targetProperty==='bananaCount'? 'bananas' : 'shame'}. May Rakk have mercy on your soul.`)
+        message.reply(`${result.firstName} now has ${(targetProperty==='bananaCount') ? result.bananaCount : (targetProperty==='shameCount')? result.shameCount: (targetProperty==='totalMinutes')? result.totalMinutes : result.totalMinutes } ${targetProperty==='bananaCount'? 'bananas' :targetProperty==='shameCount'? 'shame':'minutes clocked in'
+    }. May Rakk have mercy on your soul.`)
       
       } catch (error) {
         console.log(error)
@@ -137,6 +147,7 @@ if (message.content.includes('~checkout')){
 
 
 if(message.content.includes('~getbananas')){
+
     try {
         const result = await Member.findOne({discordID:message.author.id})
         const banana = '🍌'
@@ -156,6 +167,18 @@ if(message.content.includes('~getshame')){
         console.log(error)
         message.reply('Error getting banana count')
     }
+}
+
+
+if(message.content.includes('~gettime')){
+  try {
+      const result = await Member.findOne({discordID:message.author.id})
+      
+      message.reply(`You have logged in ${Math.floor(result.totalMinutes/60)} hours and ${result.totalMinutes%60} minutes. Get back out there and start earning!`)
+  } catch (error) {
+      console.log(error)
+      message.reply('Error getting total minutes')
+  }
 }
 
 

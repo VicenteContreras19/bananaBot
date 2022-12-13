@@ -8,6 +8,7 @@ const Member = new mongoose.Schema({
     checkInTime: Date|| null,
     checkOutTime: Date || null,
     shameCount: Number, 
+    totalMinutes: Number
 })
 
 module.exports = mongoose.model('Members',Member)
