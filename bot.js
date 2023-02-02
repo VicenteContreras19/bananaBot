@@ -9,7 +9,6 @@ const diff_minutes = require('./methods')
 
 
 
-
 //connection
 connectDb()
 
@@ -61,6 +60,7 @@ if (message.content.includes("~enroll")) {
         } catch (error) {
           console.log(error);
           message.reply("No double dipping fuckwad");
+          console.log({err: message})
         }
       }
     } else {
